@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume of {{username}}</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="container">
+        <div id="resume-container"></div>
+        <button id="download-btn">Download as PDF</button>
+        <p>Share your resume: <a id="share-link" href="">Copy Link</a></p>
+    </div>
+    <script src="../script.js"></script>
+    <script>
+        const username = "{{username}}"; // Injected username
+        const resumeData = localStorage.getItem(username + "-resume");
+
+        if (resumeData) {
+            document.getElementById('resume-container').innerHTML = resumeData;
+            document.getElementById('share-link').href = window.location.href;
+        } else {
+            document.getElementById('resume-container').innerHTML = '<p>No resume found for this user.</p>';
+        }
+
+        document.getElementById('download-btn').addEventListener('click', function() {
+            fetch('/api/generatePDF', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username, resumeData: resumeData })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = ${username}_resume.pdf;
+                link.click();
+            });
+        });
+    </script>
+</body>
+</html>
